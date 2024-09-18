@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 	"os"
@@ -10,8 +11,6 @@ import (
 	"crypto/tls"
 	// "log/slog"
 )
-
-var version string
 
 type DnsTest struct {
 	HostName          string
@@ -30,10 +29,6 @@ func show_env(key string) {
 	} else {
 		log.Printf("%s=%s\n", key, val)
 	}
-}
-
-func get_proxy() {
-
 }
 
 func test_https_no_proxy(endpoint string) {
@@ -125,26 +120,39 @@ func test_cname_resolution(CNames []CNAMETest) {
 
 func main() {
 
+	data, err := os.ReadFile("./config.json")
+
+	if err != nil {
+		return
+	}
+
+	var config string
+	err = json.Unmarshal(data, &config)
+
+	if err != nil {
+		return
+	}
+
 	log.Println("standard logger")
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	var DnsNames = []DnsTest{
-		DnsTest{
+		{
 			HostName:          "home.home.chiasson.org",
 			ExpectedIpAddress: "192.168.50.2",
 		},
-		DnsTest{
+		{
 			HostName:          "oscp-01.home.chiasson.org",
 			ExpectedIpAddress: "192.168.50.20",
 		},
-		DnsTest{
+		{
 			HostName:          "api.hosc.home.chiasson.org",
 			ExpectedIpAddress: "192.168.50.20",
 		},
 	}
 
 	var CNames = []CNAMETest{
-		CNAMETest{
+		{
 			HostName:      "api.hosc.home.chiasson.org",
 			ExpectedCNAME: "oscp-01.home.chiasson.org.",
 		},
